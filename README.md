@@ -61,6 +61,14 @@ The entire universe lives in `src/scenarios/` — plain, typed TypeScript:
 | **Scenario** | A named, playable end-to-end flow | `scenarios.ts` |
 | **Step** | One hop: from → to, protocol, payload | `steps/*.ts` |
 
+**Start from the template:** click **Use this template** on GitHub (or clone), then:
+
+```bash
+npm install
+npm run fresh   # replaces AstroMart with a minimal 2-star starter cosmos
+npm run dev     # your galaxy, ready to grow
+```
+
 Two ways to populate it:
 
 **With Claude Code (recommended)** — the repo ships with two skills. Open the repo (plus your service repos) in a Claude Code workspace and say:
@@ -69,6 +77,15 @@ Two ways to populate it:
 /add-service payments
 /add-scenario show me what happens when a customer checks out
 ```
+
+You can also install the skills into any environment as a plugin, no clone needed:
+
+```
+/plugin marketplace add omer-sher/cosmos-os
+/plugin install cosmos@cosmos-os
+```
+
+…then use `/cosmos:add-service` and `/cosmos:add-scenario` anywhere.
 
 The skills make Claude read your actual source — call sites, producers, consumers, schemas — and write verified entries. No guessing allowed; the skill files are the guardrails.
 

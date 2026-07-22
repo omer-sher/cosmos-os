@@ -1,0 +1,14 @@
+{
+  "name": "cosmos-os",
+  "description": "The Cosmos — a living map of your architecture. Skills that grow and maintain it.",
+  "owner": { "name": "Omer Sher" },
+  "plugins": [
+    {
+      "name": "cosmos",
+      "source": "./",
+      "description": "Grow a Cosmos map from real code: /cosmos:add-service researches and wires a service in, /cosmos:add-scenario traces a flow end-to-end and makes it playable.",
+      "version": "0.1.0",
+      "author": { "name": "Omer Sher" }
+    }
+  ]
+}
