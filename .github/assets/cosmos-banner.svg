@@ -25,9 +25,9 @@
       <stop offset="100%" stop-color="#f5b731" stop-opacity="0.9"/>
     </linearGradient>
     <linearGradient id="serifgrad" gradientUnits="userSpaceOnUse" x1="261" y1="176.0" x2="494" y2="136.0">
-      <stop offset="0%" stop-color="#dcebc8"/>
-      <stop offset="45%" stop-color="#c6b3f0"/>
-      <stop offset="100%" stop-color="#a5ddf5"/>
+      <stop offset="0%" stop-color="#E8F86A"/>
+      <stop offset="60%" stop-color="#C6B4FC"/>
+      <stop offset="100%" stop-color="#64E0F3"/>
     </linearGradient>
   </defs>
 
@@ -52,8 +52,6 @@
     <circle cx="726" cy="122" r="0.7" opacity="0.3"/><circle cx="972" cy="27" r="0.8" opacity="0.45"/>
     <circle cx="1225" cy="252" r="1.0" opacity="0.55"/><circle cx="27" cy="141" r="0.9" opacity="0.55"/>
   </g>
-  <!-- one four-point sparkle -->
-  <path d="M 1132 60 l 2.4 7.6 7.6 2.4 -7.6 2.4 -2.4 7.6 -2.4 -7.6 -7.6 -2.4 7.6 -2.4 Z" fill="#e6f6ff" opacity="0.9"/>
 
   <!-- ══ mini-map (right side) ══ -->
 
