@@ -1,0 +1,37 @@
+{
+  "name": "cosmos-os",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "validate": "tsx drift-sync/scripts/validate.ts",
+    "sync": "tsx drift-sync/scripts/sync.ts",
+    "sync:bootstrap": "tsx drift-sync/scripts/bootstrap-state.ts",
+    "sync:diff-repo": "tsx drift-sync/scripts/diff-repo.ts",
+    "sync:nightly": "tsx drift-sync/scripts/sync-nightly.ts",
+    "sync:apply": "tsx drift-sync/scripts/apply-edits.ts",
+    "sync:clone-repos": "tsx drift-sync/scripts/clone-repos.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.95.1",
+    "framer-motion": "^11.11.0",
+    "gsap": "^3.13.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tsx": "^4.22.3",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}

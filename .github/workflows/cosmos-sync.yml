@@ -1,0 +1,153 @@
+name: Cosmos Drift Sync
+
+# Nightly cron that:
+#   1. Clones every source repo referenced by drift-sync/state.json
+#   2. Runs sync:nightly which:
+#      - per repo: diffs baseline-sha → current origin HEAD
+#      - prefilter + AI agent verdict
+#      - buckets by team
+#      - applier writes real Cosmos edits + runs validator in-loop
+#      - opens one draft PR per team
+#      - posts to the single cosmos Slack channel, tagging the team
+#        via @-mention; on a fully clean run posts an all-clear heartbeat
+#
+# Manual trigger via workflow_dispatch supports dry-run / findings-pr / live
+# modes and a single-repo debug filter.
+#
+# ── Enabling this workflow ─────────────────────────────────────────
+# Disabled by default so forks don't run a failing cron. To enable:
+#   1. Create drift-sync/config.json (copy config.example.json) with your
+#      GitHub org, and bootstrap drift-sync/state.json — see drift-sync/README.md.
+#   2. Add the secrets listed below (Settings → Secrets and variables → Actions).
+#   3. Create a repository VARIABLE named DRIFT_SYNC_ENABLED with value `true`
+#      (Settings → Secrets and variables → Actions → Variables).
+#
+# Secrets:
+#   ANTHROPIC_API_KEY    (required)          — powers the diff/applier agents
+#   COSMOS_SYNC_PAT      (required for live) — PAT with `repo` scope to clone
+#                                              the source repos; falls back to
+#                                              GITHUB_TOKEN (this repo only)
+#   SLACK_WEBHOOK_COSMOS (optional)          — incoming-webhook URL for pings
+#
+# Team → Slack user-group mapping lives in drift-sync/config.json
+# (slackTeamGroups). Individual teams can also be injected as env vars
+# (SLACK_GROUP_ID_<TEAM>) — env wins over config.
+
+on:
+  schedule:
+    # 04:17 UTC daily (off the hour to avoid GH Actions top-of-hour schedule drops)
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Run mode'
+        type: choice
+        options:
+          - dry-run        # findings only, no PRs, no Slack
+          - findings-pr    # PRs opened, no actual applier edits (skip-applier)
+          - live           # full loop: edits + PRs + Slack
+        default: dry-run
+      only_repo:
+        description: 'Only sync this repo (debug — leave blank for all)'
+        required: false
+        default: ''
+      concurrency:
+        description: 'Max parallel agents'
+        required: false
+        default: '5'
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: cosmos-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    # Opt-in guard: forks get a skipped (not failing) run until they set the
+    # DRIFT_SYNC_ENABLED repository variable to 'true'.
+    if: vars.DRIFT_SYNC_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout cosmos
+        # Uses the default GITHUB_TOKEN (always works for the host repo).
+        # COSMOS_SYNC_PAT is reserved for the cross-repo clone step below.
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Configure git identity
+        run: |
+          git config user.name "cosmos-sync-bot"
+          git config user.email "cosmos-sync-bot@users.noreply.github.com"
+
+      - name: Clone source repos
+        env:
+          GH_TOKEN: ${{ secrets.COSMOS_SYNC_PAT || secrets.GITHUB_TOKEN }}
+          # Org comes from drift-sync/config.json; GITHUB_ORG env overrides it,
+          # and GITHUB_REPOSITORY_OWNER (this repo's org) is the final fallback.
+          REPOS_ROOT: ${{ runner.temp }}/source-repos
+        run: |
+          mkdir -p "$REPOS_ROOT"
+          npm run sync:clone-repos
+
+      - name: Determine flags
+        id: flags
+        run: |
+          MODE="${{ github.event.inputs.mode || 'live' }}"
+          ONLY="${{ github.event.inputs.only_repo }}"
+          CONCURRENCY="${{ github.event.inputs.concurrency || '5' }}"
+
+          EXTRA=""
+          case "$MODE" in
+            dry-run)     EXTRA="--skip-applier" ;;
+            findings-pr) EXTRA="--skip-applier" ;;
+            live)        EXTRA="--live-pr" ;;
+            *)           EXTRA="--skip-applier" ;;
+          esac
+          if [ -n "$ONLY" ]; then EXTRA="$EXTRA --only $ONLY"; fi
+
+          echo "extra=$EXTRA"           >> "$GITHUB_OUTPUT"
+          echo "concurrency=$CONCURRENCY" >> "$GITHUB_OUTPUT"
+          echo "mode=$MODE"             >> "$GITHUB_OUTPUT"
+
+      - name: Run cosmos-sync nightly
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_TOKEN: ${{ secrets.COSMOS_SYNC_PAT || secrets.GITHUB_TOKEN }}
+          REPOS_ROOT: ${{ runner.temp }}/source-repos
+          # Single channel for all cosmos-sync notifications. Team is identified
+          # via the @-mention in the message body — the team → Slack user-group
+          # mapping lives in drift-sync/config.json (slackTeamGroups), or can be
+          # injected here as SLACK_GROUP_ID_<TEAM> env vars (env wins).
+          SLACK_WEBHOOK_COSMOS: ${{ secrets.SLACK_WEBHOOK_COSMOS }}
+        run: |
+          npm run sync:nightly -- --concurrency ${{ steps.flags.outputs.concurrency }} ${{ steps.flags.outputs.extra }}
+
+      - name: Upload dry-run report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cosmos-sync-dry-run-${{ github.run_id }}
+          path: |
+            drift-sync/dry-runs/**/*.md
+            drift-sync/dry-runs/*.md
+            drift-sync/dry-runs/**/*.html
+            drift-sync/dry-runs/*.html
+          retention-days: 10
+          include-hidden-files: true
+          if-no-files-found: warn

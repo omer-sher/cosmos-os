@@ -1,0 +1,16 @@
+{
+  "githubOrg": "astromart",
+  "defaultBranch": "main",
+  "reposRoot": "..",
+  "slackWebhookEnv": "SLACK_WEBHOOK_COSMOS",
+  "slackTeamGroups": {
+    "team-shopping": "S0123ABCDE",
+    "team-fulfillment": "S0456FGHIJ",
+    "team-engagement": "S0789KLMNO"
+  },
+  "topicRegistry": {
+    "repo": "astromart-infra",
+    "path": "kafka/topics/production.yaml",
+    "topicPrefix": "production."
+  }
+}

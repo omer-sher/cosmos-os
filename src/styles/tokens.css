@@ -1,0 +1,248 @@
+/* ════════════════════════════════════════════════════════════
+   Cosmos — Design Tokens (v0.2)
+   Editorial / engineered direction. Sharper, more confident,
+   monochrome-leaning with deliberate color punctuation.
+   ════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Type stack */
+  --font-display: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif:   'Instrument Serif', 'Times New Roman', Georgia, serif;
+  --font-mono:    'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+
+  --text-3xs: 9px;
+  --text-2xs: 10px;
+  --text-xs:  11px;
+  --text-sm:  12px;
+  --text-md:  13px;
+  --text-base:14px;
+  --text-lg:  17px;
+  --text-xl:  22px;
+  --text-2xl: 36px;
+  --text-3xl: 64px;
+  --text-4xl: 96px;
+
+  --tracking-tightest: -0.04em;
+  --tracking-tight:    -0.025em;
+  --tracking-snug:     -0.012em;
+  --tracking-normal:    0;
+  --tracking-wide:      0.04em;
+  --tracking-wider:     0.10em;
+  --tracking-widest:    0.22em;
+
+  /* Spacing — 4px base */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Radius — sharp by default */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 10px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --ease-out:  cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  --ease-std:  cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in:   cubic-bezier(0.4, 0, 1, 0.6);
+  --dur-fast:  100ms;
+  --dur-mid:   200ms;
+  --dur-slow:  400ms;
+
+  /* Service hues — restrained chroma so they punctuate, not shout */
+  --svc-cyan:    oklch(0.80 0.13 210);
+  --svc-green:   oklch(0.80 0.13 158);
+  --svc-amber:   oklch(0.82 0.14  88);
+  --svc-red:     oklch(0.70 0.18  22);
+  --svc-violet:  oklch(0.76 0.14 295);
+  --svc-blue:    oklch(0.72 0.16 258);
+  --svc-pink:    oklch(0.76 0.14 350);
+  --svc-magenta: oklch(0.76 0.16 320);
+  --svc-orange:  oklch(0.76 0.16  56);
+  --svc-teal:    oklch(0.80 0.13 188);
+  /* Extension hues — second wave of services (Capture-Moment, etc.) */
+  --svc-yellow:  oklch(0.84 0.16  82);
+  --svc-rose:    oklch(0.74 0.18  10);
+  --svc-purple:  oklch(0.72 0.18 305);
+  --svc-emerald: oklch(0.74 0.16 152);
+
+  /* Protocol */
+  --p-http:     var(--svc-amber);
+  --p-ws:       var(--svc-cyan);
+  --p-kafka:    var(--svc-orange);
+  --p-internal: oklch(0.55 0.02 260);
+
+  --shadow-sm:  0 1px 0 rgba(0,0,0,0.4);
+  --shadow-md:  0 2px 0 rgba(0,0,0,0.5);
+  --shadow-lg:  0 4px 0 rgba(0,0,0,0.6);
+  --shadow-glow: 0 0 24px -4px currentColor;
+}
+
+/* ── Token aliases used by components.css ────────────────────
+   The component CSS in this design system was authored with a
+   shorter naming scheme (--text-1/2/3, --surface-1/2). Aliases
+   live in :root and resolve lazily per active theme. */
+:root {
+  --text-1:    var(--text-bright);
+  --text-2:    var(--text);
+  --text-3:    var(--text-dim);
+  --surface-1: var(--bg-surface);
+  --surface-2: var(--bg-surface-2);
+}
+
+/* ── COSMOS (default — deep ink) ───────────────────────────── */
+:root, [data-theme="cosmos"] {
+  --bg:            #0B0C0E;
+  --bg-deep:       #050608;
+  --bg-surface:    #111316;
+  --bg-surface-2:  #15181C;
+  --bg-elevated:   rgba(20, 22, 26, 0.96);
+
+  --border:        #1F2328;
+  --border-strong: #2E343B;
+  --rule:          #FAFAFA;            /* used for heavy rules */
+
+  --text:          #C9CDD3;
+  --text-dim:      #7A8088;
+  --text-bright:   #FAFBFC;
+  --text-faint:    #4A5058;
+
+  --accent:        #E6F75A;            /* electric chartreuse — punchy, NOT generic blue */
+  --accent-fg:     #000000;
+  --accent-2:      var(--svc-violet);
+  --accent-3:      var(--svc-green);
+
+  --bg-ambient: none;                   /* no gradient blobs */
+  --grid-color:    rgba(255,255,255,0.03);
+  --glow-strength: 0.6;
+  color-scheme: dark;
+}
+
+/* ── DARK MINIMAL ─────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg:            #0E0F11;
+  --bg-deep:       #08090B;
+  --bg-surface:    #131518;
+  --bg-surface-2:  #181A1E;
+  --bg-elevated:   rgba(22, 24, 28, 0.96);
+
+  --border:        #20242A;
+  --border-strong: #2F353C;
+  --rule:          #FAFAFA;
+
+  --text:          #C9CDD3;
+  --text-dim:      #7A8088;
+  --text-bright:   #FAFBFC;
+  --text-faint:    #4A5058;
+
+  --accent:        #C0D6FF;
+  --accent-fg:     #06080C;
+  --accent-2:      #C0D6FF;
+  --accent-3:      #C0D6FF;
+
+  --bg-ambient: none;
+  --grid-color:    rgba(255,255,255,0.025);
+  --glow-strength: 0.2;
+  color-scheme: dark;
+}
+
+/* ── LIGHT — newsprint, high-contrast ─────────────────────── */
+[data-theme="light"] {
+  --bg:            #FAFAF7;
+  --bg-deep:       #F1F1EC;
+  --bg-surface:    #FFFFFF;
+  --bg-surface-2:  #F5F5F0;
+  --bg-elevated:   rgba(255, 255, 255, 0.98);
+
+  --border:        #E0E0DA;
+  --border-strong: #B8B8B0;
+  --rule:          #0A0A0A;
+
+  --text:          #2A2A28;
+  --text-dim:      #5E5E58;
+  --text-bright:   #0A0A08;
+  --text-faint:    #9A9A92;
+
+  --accent:        #0A0A0A;
+  --accent-fg:     #FAFAF7;
+  --accent-2:      #C2410C;
+  --accent-3:      #1F4D2B;
+
+  --svc-cyan:    oklch(0.55 0.16 210);
+  --svc-green:   oklch(0.50 0.16 158);
+  --svc-amber:   oklch(0.62 0.18  72);
+  --svc-red:     oklch(0.52 0.20  22);
+  --svc-violet:  oklch(0.50 0.20 295);
+  --svc-blue:    oklch(0.50 0.20 258);
+  --svc-pink:    oklch(0.58 0.18 350);
+  --svc-magenta: oklch(0.52 0.20 320);
+  --svc-orange:  oklch(0.58 0.18  56);
+  --svc-teal:    oklch(0.52 0.16 188);
+  --svc-yellow:  oklch(0.62 0.18  82);
+  --svc-rose:    oklch(0.55 0.20  10);
+  --svc-purple:  oklch(0.50 0.22 305);
+  --svc-emerald: oklch(0.50 0.18 152);
+
+  --bg-ambient: none;
+  --grid-color: rgba(0,0,0,0.04);
+  --glow-strength: 0.3;
+  color-scheme: light;
+}
+
+/* ── MINIMAL — pure mono with single ink ──────────────────── */
+[data-theme="minimal"] {
+  --bg:            #FFFFFF;
+  --bg-deep:       #F5F5F5;
+  --bg-surface:    #FFFFFF;
+  --bg-surface-2:  #FAFAFA;
+  --bg-elevated:   rgba(255, 255, 255, 0.98);
+
+  --border:        #E0E0E0;
+  --border-strong: #999999;
+  --rule:          #000000;
+
+  --text:          #1A1A1A;
+  --text-dim:      #555555;
+  --text-bright:   #000000;
+  --text-faint:    #999999;
+
+  --accent:        #000000;
+  --accent-fg:     #FFFFFF;
+  --accent-2:      #000000;
+  --accent-3:      #000000;
+
+  --svc-cyan:    #2A2A2A;
+  --svc-green:   #2A2A2A;
+  --svc-amber:   #2A2A2A;
+  --svc-red:     #2A2A2A;
+  --svc-violet:  #2A2A2A;
+  --svc-blue:    #000000;
+  --svc-pink:    #2A2A2A;
+  --svc-magenta: #2A2A2A;
+  --svc-orange:  #2A2A2A;
+  --svc-teal:    #2A2A2A;
+  --svc-yellow:  #2A2A2A;
+  --svc-rose:    #2A2A2A;
+  --svc-purple:  #2A2A2A;
+  --svc-emerald: #2A2A2A;
+
+  --bg-ambient: none;
+  --grid-color: rgba(0,0,0,0.04);
+  --glow-strength: 0;
+  color-scheme: light;
+}
+
+.lc-glow {
+  box-shadow: 0 0 calc(16px * var(--glow-strength)) currentColor;
+}

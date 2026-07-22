@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "bootstrap_at": "2026-01-15T04:17:00.000Z",
+  "repos": {
+    "orders": {
+      "sha": "8c4f2a91d3e5b7a0c6f1e9d2b4a8c0e7f5d3b1a9",
+      "branch": "main",
+      "bootstrap_at": "2026-01-15T04:17:00.000Z",
+      "pulled": true
+    },
+    "payments": {
+      "sha": "1f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e",
+      "branch": "main",
+      "bootstrap_at": "2026-01-15T04:17:00.000Z"
+    }
+  }
+}

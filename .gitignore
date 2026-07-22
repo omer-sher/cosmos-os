@@ -1,0 +1,25 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# TypeScript
+tsconfig.tsbuildinfo
+*.js.map
+
+# env
+.env
+.env.*
+.env.local
+!.env.example
+
+# OS
+.DS_Store
+
+# editors
+.vscode/
+.idea/
+
+# cosmos-sync dry-run reports (kept locally for review, not committed)
+drift-sync/dry-runs/

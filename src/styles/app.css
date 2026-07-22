@@ -1,0 +1,2195 @@
+/* ════════════════════════════════════════════════════════════
+   App shell — sets the viewport grid, top bar, play bar, side
+   panels, intro overlay, and activity log. Map-specific visuals
+   live in the design-system's components.css.
+   ════════════════════════════════════════════════════════════ */
+
+.lc-app {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: #04060A;
+  overflow: hidden;
+}
+
+/* ── Always-on starfield behind everything ─────────────────── */
+.lc-app-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* Was 0.85 — that knocked the already-dim stars almost invisible. */
+  opacity: 1;
+}
+.lc-app-bg .lc-starfield,
+.lc-app-bg .lc-brand-starfield {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* The whole shell sits above the starfield. The topbar must outrank the
+   stage so dropdowns and the dot-strip render on top of the map. */
+.lc-app > .lc-stage  { position: relative; z-index: 1; }
+.lc-app > .lc-topbar { position: relative; z-index: 20; }
+
+/* ── Reveal — when CTA fires the map ignites slowly ──────── */
+.lc-app[data-revealing='true'] .lc-stage {
+  animation: lc-stage-reveal 1.4s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+.lc-app[data-revealing='true'] .lc-topbar {
+  animation: lc-topbar-reveal 1.6s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+@keyframes lc-stage-reveal {
+  0%   { opacity: 0; filter: blur(18px) brightness(2); transform: scale(1.04); }
+  60%  { opacity: 1; filter: blur(0) brightness(1.45); transform: scale(1); }
+  100% { opacity: 1; filter: blur(0) brightness(1); }
+}
+@keyframes lc-topbar-reveal {
+  0%   { opacity: 0; transform: translateY(-12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Service / topic auras "ignite" — bright flash that settles. */
+.lc-app[data-revealing='true'] .lc-map-svg circle,
+.lc-app[data-revealing='true'] .lc-map-svg ellipse,
+.lc-app[data-revealing='true'] .lc-map-svg rect,
+.lc-app[data-revealing='true'] .lc-map-svg path,
+.lc-app[data-revealing='true'] .lc-map-svg text {
+  animation: lc-ignite 1.8s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+@keyframes lc-ignite {
+  0%   { opacity: 0; }
+  35%  { opacity: 0.2; filter: brightness(2.2); }
+  100% { opacity: inherit; filter: none; }
+}
+
+/* Bright radial flash that blooms then fades — the "shining" moment. */
+.lc-reveal-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 50% 40% at 50% 55%,
+    rgba(230, 247, 90, 0.18) 0%,
+    rgba(230, 247, 90, 0.06) 25%,
+    rgba(120, 80, 200, 0.04) 55%,
+    transparent 80%
+  );
+  animation: lc-reveal-flash 1.6s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+@keyframes lc-reveal-flash {
+  0%   { opacity: 0; transform: scale(0.65); filter: blur(40px); }
+  30%  { opacity: 1; transform: scale(1.08); filter: blur(8px); }
+  100% { opacity: 0; transform: scale(1.4); filter: blur(60px); }
+}
+
+/* ── Top bar ───────────────────────────────────────────────── */
+.lc-topbar {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 5;
+}
+.lc-topbar-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px;
+}
+.lc-topbar-side {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.lc-topbar-side--left  { justify-content: flex-start; }
+.lc-topbar-side--right { justify-content: flex-end; }
+.lc-topbar-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lc-topbar-strip {
+  display: flex;
+  align-items: center;
+  padding: 6px 18px 8px;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+}
+.lc-topbar-brand {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--text-1);
+}
+.lc-topbar-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.lc-topbar-spacer { flex: 1; }
+
+/* Map cursors */
+.lc-app .lc-map-stage {
+  cursor: grab;
+  /* Never let drags select SVG <text> labels or sweep into chrome text. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.lc-app .lc-map-stage svg,
+.lc-app .lc-map-stage svg * { -webkit-user-select: none; user-select: none; }
+.lc-app .lc-map-stage[data-panning='true'] { cursor: grabbing; }
+.lc-app .lc-map-stage[data-panning='true'] * { cursor: grabbing !important; }
+/* During a drag, also freeze selection app-wide as a safety net
+   (the SVG capture means the pointer rarely escapes, but on long
+   drags the browser can still latch onto the body's selection.) */
+body:has(.lc-map-stage[data-panning='true']),
+body:has(.lc-map-stage[data-panning='true']) * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+/* Zoom controls (bottom-right of map) */
+.lc-map-zoom {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: inline-flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--surface-1) 86%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 10;
+}
+.lc-map-zoom-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 30px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-std), color var(--dur-fast) var(--ease-std);
+}
+.lc-map-zoom-btn:last-child { border-bottom: 0; }
+.lc-map-zoom-btn:hover { background: var(--bg-surface-2); color: var(--text-1); }
+.lc-map-zoom-reset {
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  color: var(--text-3);
+}
+
+/* ── Layout edit mode controls ─────────────────────────────── */
+.lc-layout-controls {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  display: inline-flex;
+  flex-direction: row;
+  gap: 6px;
+  z-index: 10;
+}
+.lc-layout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 0 12px;
+  background: color-mix(in srgb, var(--surface-1) 86%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-std), color var(--dur-fast) var(--ease-std);
+}
+.lc-layout-btn:hover { background: var(--bg-surface-2); color: var(--text-1); }
+.lc-layout-btn--done {
+  border-color: var(--svc-cyan);
+  color: var(--svc-cyan);
+}
+.lc-layout-btn--done:hover { background: color-mix(in srgb, var(--svc-cyan) 12%, transparent); }
+.lc-layout-btn--danger { color: var(--svc-red); }
+.lc-layout-btn--danger:hover { background: color-mix(in srgb, var(--svc-red) 10%, transparent); }
+.lc-layout-btn--copy { width: 84px; }
+
+/* Grabbing cursor while dragging a node */
+.lc-map-svg[data-layout='true'] { cursor: default; }
+
+/* ── Domain bar = tabs + dropdown menu ─────────────────────── */
+.lc-domain-bar { position: relative; }
+.lc-domain-tab-caret {
+  font-size: 9px;
+  opacity: 0.55;
+  transition: transform var(--dur-fast) var(--ease-std), opacity var(--dur-fast) var(--ease-std);
+}
+.lc-domain-tab[data-open='true'] .lc-domain-tab-caret { transform: rotate(180deg); opacity: 0.95; }
+
+.lc-domain-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  max-width: 360px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 5%, transparent),
+    0 24px 60px -20px rgba(0, 0, 0, 0.85),
+    0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent);
+  z-index: 35;
+  animation: lc-menu-in 200ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+@keyframes lc-menu-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Scenario status (read-only — title-styled centerpiece) ── */
+.lc-scenario-status {
+  --c: var(--text-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 18px 8px 14px;
+  border: 1px solid color-mix(in srgb, var(--c) 28%, var(--border));
+  border-radius: var(--radius-pill);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--c) 6%, transparent) 0%,
+      color-mix(in srgb, var(--c) 2%, transparent) 100%);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 6%, transparent),
+    0 0 28px -8px color-mix(in srgb, var(--c) 60%, transparent);
+  color: var(--text-1);
+  font-family: var(--font-display);
+  font-weight: 500;
+  user-select: none;
+  transition: border-color var(--dur-mid) var(--ease-std),
+              box-shadow var(--dur-mid) var(--ease-std);
+}
+.lc-scenario-status[data-active='true'] {
+  border-color: color-mix(in srgb, var(--c) 55%, var(--border));
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 8%, transparent),
+    0 0 36px -6px color-mix(in srgb, var(--c) 80%, transparent);
+}
+.lc-scenario-status-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--c) 60%, var(--text-3));
+}
+.lc-scenario-status-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--c) 40%, transparent),
+    0 0 14px 2px color-mix(in srgb, var(--c) 75%, transparent);
+}
+.lc-scenario-status[data-active='true'] .lc-scenario-status-dot {
+  animation: lc-scenario-dot-pulse 2.4s ease-in-out infinite;
+}
+@keyframes lc-scenario-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 40%, transparent), 0 0 14px 2px color-mix(in srgb, var(--c) 75%, transparent); }
+  50%      { box-shadow: 0 0 0 2px color-mix(in srgb, var(--c) 60%, transparent), 0 0 24px 4px color-mix(in srgb, var(--c) 95%, transparent); }
+}
+.lc-scenario-status-label {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.012em;
+  color: var(--text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 38ch;
+}
+/* When no scenario is selected the chip is showing a placeholder, not
+   a title — match the app's metadata typography (mono caps tracked) so
+   it reads as system status, not as a name. */
+.lc-scenario-status[data-active='false'] .lc-scenario-status-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.lc-scenario-status[data-active='true'] .lc-scenario-status-label {
+  background: linear-gradient(95deg,
+    color-mix(in srgb, white 96%, transparent) 0%,
+    color-mix(in srgb, var(--c) 70%, white 30%) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--c) 35%, transparent);
+}
+
+/* ── Domain tabs ───────────────────────────────────────────── */
+.lc-domain-tabs {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+.lc-domain-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--border);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-std), color var(--dur-fast) var(--ease-std);
+}
+.lc-domain-tab:last-child { border-right: 0; }
+.lc-domain-tab:hover { color: var(--text-1); background: var(--bg-surface-2); }
+.lc-domain-tab[data-active='true'] {
+  color: var(--accent-fg);
+  background: var(--accent);
+}
+.lc-domain-tab[data-empty='true'] { color: var(--text-3); }
+.lc-domain-tab-count { color: inherit; opacity: 0.7; font-size: 9px; }
+
+/* ── Scenario picker ───────────────────────────────────────── */
+.lc-picker { position: relative; }
+.lc-picker-toggle {
+  --c: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-1);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  min-width: 220px;
+  transition: border-color var(--dur-fast) var(--ease-std);
+}
+.lc-picker-toggle:hover { border-color: var(--border-strong); }
+.lc-picker-toggle[aria-expanded='true'] {
+  border-color: var(--c);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 30%, transparent);
+}
+.lc-picker-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--c) 50%, transparent);
+}
+.lc-picker-label { flex: 1; }
+.lc-picker-caret { color: var(--text-3); font-size: 10px; }
+
+.lc-picker-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 280px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 6px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 16px 40px -16px rgba(0,0,0,0.6);
+  z-index: 30;
+}
+.lc-picker-menu-hdr {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 6px 8px;
+}
+.lc-picker-menu-empty {
+  padding: 14px 10px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--text-3);
+}
+.lc-picker-item {
+  --c: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-1);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-std);
+}
+.lc-picker-item:hover:not(:disabled) { background: var(--bg-surface-2); }
+.lc-picker-item:disabled { cursor: not-allowed; opacity: 0.55; }
+.lc-picker-item[data-active='true'] {
+  border-color: color-mix(in srgb, var(--c) 50%, transparent);
+}
+.lc-picker-item-swatch {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--c) 60%, transparent);
+}
+.lc-picker-item-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.lc-picker-item-label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-1);
+}
+.lc-picker-item-sub {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+}
+.lc-picker-item-badge {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--text-3);
+}
+
+/* ── Stage = map + floating overlays (step panel, activity log, strip) ─ */
+.lc-stage {
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+.lc-app .lc-map-stage {
+  aspect-ratio: auto;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  /* Let the brand starfield in .lc-app-bg show through. The design
+     system defaulted to a solid #04060A which was blocking it. */
+  background: transparent;
+}
+.lc-app .lc-map-stage::before { display: none; } /* drop the dot grid too */
+
+/* ── Floating playback controls panel (bottom-center of stage) ─ */
+.lc-controls {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 18px 12px;
+  width: min(640px, 84vw);
+  border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--border));
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--surface-1) 92%, transparent) 0%,
+      color-mix(in srgb, var(--surface-1) 80%, transparent) 100%);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 6%, transparent),
+    0 16px 40px -16px rgba(0, 0, 0, 0.8),
+    0 0 28px -8px color-mix(in srgb, var(--accent) 30%, transparent);
+  z-index: 12;
+}
+.lc-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.lc-controls-dots {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+  padding: 4px 6px 0;
+}
+.lc-controls-dot {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 14px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.lc-controls-dot::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border);
+  transition:
+    background var(--dur-fast) var(--ease-std),
+    border-color var(--dur-fast) var(--ease-std),
+    box-shadow var(--dur-fast) var(--ease-std),
+    transform var(--dur-fast) var(--ease-out);
+}
+.lc-controls-dot:hover::before { transform: scale(1.35); }
+.lc-controls-dot:active::before { transform: scale(0.85); }
+.lc-controls-dot[data-done='true']::before { background: var(--text-3); border-color: var(--text-3); }
+.lc-controls-dot[data-current='true']::before {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 60%, transparent),
+    0 0 12px 2px color-mix(in srgb, var(--accent) 70%, transparent);
+  transform: scale(1.25);
+  animation: lc-dot-pulse 1.6s ease-in-out infinite;
+}
+@keyframes lc-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 60%, transparent), 0 0 12px 2px color-mix(in srgb, var(--accent) 70%, transparent); }
+  50%      { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 80%, transparent), 0 0 20px 4px color-mix(in srgb, var(--accent) 90%, transparent); }
+}
+
+/* Bigger transport buttons inside the floating panel. */
+.lc-controls .lc-pb-btn {
+  width: 42px;
+  height: 42px;
+  font-size: 18px;
+  border-radius: var(--radius-pill);
+}
+.lc-controls .lc-pb-play {
+  width: 56px;
+  height: 42px;
+  font-size: 16px;
+}
+.lc-controls .lc-pb-play[data-finished='true'] {
+  font-size: 22px;
+  animation: lc-restart-pulse 2.4s ease-in-out infinite;
+}
+@keyframes lc-restart-pulse {
+  0%, 100% { box-shadow: inset 0 1px 0 0 color-mix(in srgb, white 35%, transparent), 0 0 22px -6px color-mix(in srgb, var(--accent) 70%, transparent); }
+  50%      { box-shadow: inset 0 1px 0 0 color-mix(in srgb, white 50%, transparent), 0 0 36px -4px color-mix(in srgb, var(--accent) 95%, transparent); }
+}
+.lc-controls .lc-pb-group {
+  border-radius: var(--radius-pill);
+}
+.lc-controls .lc-pb-pill {
+  padding: 9px 14px;
+  font-size: 11px;
+}
+
+/* ── Click animations on transport buttons ─────────────────── */
+.lc-pb-btn {
+  transition:
+    background var(--dur-fast) var(--ease-std),
+    border-color var(--dur-fast) var(--ease-std),
+    transform 120ms var(--ease-out),
+    box-shadow var(--dur-mid) var(--ease-std),
+    filter var(--dur-fast) var(--ease-std);
+}
+.lc-pb-btn:not(:disabled):active {
+  transform: scale(0.92);
+  filter: brightness(1.1);
+}
+.lc-pb-pill {
+  transition:
+    background var(--dur-fast) var(--ease-std),
+    color var(--dur-fast) var(--ease-std),
+    transform 120ms var(--ease-out);
+}
+.lc-pb-pill:not(:disabled):active {
+  transform: scale(0.94);
+}
+
+/* ── Step dots strip (lives inside the top bar, second row) ─ */
+.lc-stripe-top {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+  padding: 2px 0;
+}
+.lc-stripe-top::-webkit-scrollbar { height: 4px; }
+.lc-stripe-top::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+.lc-stripe-top::-webkit-scrollbar-track { background: transparent; }
+.lc-stripe-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  padding: 0;
+  transition: transform var(--dur-fast) var(--ease-std), background var(--dur-fast) var(--ease-std);
+}
+.lc-stripe-dot:hover { transform: scale(1.3); }
+.lc-stripe-dot[data-done='true'] { background: var(--text-3); }
+.lc-stripe-dot[data-current='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* ── Legacy bottom playbar (kept for reference; not used by App) ─ */
+.lc-playbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 5;
+}
+.lc-playbar[data-disabled='true'] { opacity: 0.55; }
+.lc-pb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std);
+}
+.lc-pb-btn:hover:not(:disabled) { background: var(--bg-surface-2); border-color: var(--border-strong); }
+.lc-pb-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.lc-pb-play {
+  width: 38px; height: 30px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: var(--accent);
+  font-size: 11px;
+}
+.lc-pb-play:hover:not(:disabled) {
+  filter: brightness(1.05);
+  background: var(--accent);
+}
+
+.lc-pb-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 6px;
+  flex-wrap: wrap;
+  max-width: 50vw;
+}
+.lc-pb-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  padding: 0;
+  transition: transform var(--dur-fast) var(--ease-std), background var(--dur-fast) var(--ease-std);
+}
+.lc-pb-dot:hover { transform: scale(1.2); }
+.lc-pb-dot[data-done='true'] { background: var(--text-3); }
+.lc-pb-dot[data-current='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 8px 1px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.lc-pb-spacer { flex: 1; }
+
+.lc-pb-group {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+.lc-pb-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--border);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-std), color var(--dur-fast) var(--ease-std);
+}
+.lc-pb-group .lc-pb-pill:last-child { border-right: 0; }
+.lc-pb-pill:hover { color: var(--text-1); background: var(--bg-surface-2); }
+.lc-pb-pill[data-active='true'] {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+/* Standalone pill (loop button outside any group) */
+.lc-pb-pill--solo,
+.lc-playbar > .lc-pb-pill {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+
+/* ── Step explainer panel (right side, while playing) ─────── */
+.lc-step-panel {
+  position: absolute;
+  top: 14px; bottom: 14px; right: 14px;
+  width: 360px;
+  padding: 22px 22px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface-1) 86%, transparent);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  z-index: 10;
+}
+.lc-step-panel-close {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 24px; height: 24px;
+  display: grid; place-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.lc-step-panel-close:hover { color: var(--text-1); border-color: var(--text-2); }
+.lc-step-panel-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.lc-step-panel-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.014em;
+  color: var(--text-1);
+}
+.lc-step-panel-sub {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.lc-step-panel-proto {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  border: 1px solid currentColor;
+}
+.lc-step-panel-path {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-2);
+  letter-spacing: 0.04em;
+}
+.lc-step-panel-desc {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-2);
+  text-wrap: pretty;
+}
+.lc-step-panel-payload {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lc-payload-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lc-payload-heading {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-1);
+  padding: 4px 0 2px;
+}
+.lc-payload-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent) 30%, var(--text-3));
+  padding-top: 4px;
+}
+.lc-payload-comment {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.55;
+  color: var(--text-3);
+  white-space: pre-wrap;
+  padding: 2px 0;
+}
+.lc-payload-code {
+  margin: 0;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--bg-surface) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 12%, var(--border));
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--text-1);
+  overflow: auto;
+  max-height: 32vh;
+  white-space: pre;
+}
+.lc-step-panel-sec-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.lc-step-panel-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.lc-step-panel-counter {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-3);
+  letter-spacing: 0.16em;
+}
+
+/* ── Live activity log (bottom-left) ──────────────────────── */
+.lc-activity {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  width: 320px;
+  max-height: 280px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface-1) 86%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 10;
+}
+.lc-activity-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.lc-activity-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.lc-activity-clear {
+  background: transparent;
+  border: 0;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.lc-activity-clear:hover { color: var(--text-1); }
+.lc-activity-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lc-activity-empty {
+  padding: 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-3);
+}
+.lc-activity-row {
+  display: flex;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-1);
+}
+.lc-activity-row:hover { background: var(--bg-surface-2); }
+.lc-activity-proto {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: 2px;
+  border: 1px solid currentColor;
+  flex-shrink: 0;
+  align-self: center;
+}
+.lc-activity-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ════════════════════════════════════════════════════════════
+   Warp transition — hyperspace jump from intro into the cosmos
+   ════════════════════════════════════════════════════════════ */
+.lc-warp {
+  position: fixed;
+  inset: 0;
+  /* Deep navy background — Star Wars hyperspace tunnel sits on a
+     blue-black void, not pure black. The canvas paints over this. */
+  background: #02040c;
+  z-index: 110;
+  overflow: hidden;
+  animation: lc-warp-in 220ms ease-out both;
+}
+@keyframes lc-warp-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.lc-warp-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ── Spotlight search ───────────────────────────────────────── */
+.lc-spotlight-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 120px;
+}
+.lc-spotlight {
+  width: 520px;
+  max-width: calc(100vw - 32px);
+  background: color-mix(in srgb, var(--surface-1) 96%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  overflow: hidden;
+}
+.lc-spotlight-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.lc-spotlight-icon { color: var(--text-3); flex-shrink: 0; }
+.lc-spotlight-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  font-size: 15px;
+}
+.lc-spotlight-input::placeholder { color: var(--text-3); }
+.lc-spotlight-esc {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-3);
+  background: var(--bg-surface-2, rgba(255,255,255,0.06));
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.lc-spotlight-results { padding: 6px 0; max-height: 360px; overflow-y: auto; }
+.lc-spotlight-group { padding: 4px 0; }
+.lc-spotlight-group-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding: 4px 16px 2px;
+}
+.lc-spotlight-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--dur-fast) var(--ease-std);
+}
+.lc-spotlight-row--active { background: rgba(255,255,255,0.06); }
+.lc-spotlight-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.lc-spotlight-label {
+  color: var(--text-1);
+  font-size: 13.5px;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lc-spotlight-sub {
+  color: var(--text-3);
+  font-size: 11.5px;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.lc-spotlight-badge {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+.lc-spotlight-empty,
+.lc-spotlight-hint {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 12.5px;
+}
+.lc-spotlight-hint kbd {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+/* ── Cosmos chat ────────────────────────────────────────────── */
+/* ── Cosmos chat trigger ─────────────────────────────────────── */
+.lc-chat-trigger {
+  position: absolute;
+  right: 58px;
+  bottom: 14px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--svc-magenta) 40%, var(--border));
+  background: color-mix(in srgb, var(--surface-1) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--svc-magenta);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: box-shadow 300ms var(--ease-std), border-color 300ms var(--ease-std), color 300ms var(--ease-std);
+  box-shadow: 0 0 12px -4px color-mix(in srgb, var(--svc-magenta) 40%, transparent);
+}
+.lc-chat-trigger:hover,
+.lc-chat-trigger[data-open='true'] {
+  border-color: var(--svc-magenta);
+  box-shadow: 0 0 20px -4px color-mix(in srgb, var(--svc-magenta) 65%, transparent);
+}
+
+/* ── Cosmos chat panel ───────────────────────────────────────── */
+.lc-chat-panel {
+  position: absolute;
+  right: 58px;
+  bottom: 58px;
+  width: 468px;
+  max-height: 520px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid color-mix(in srgb, var(--svc-magenta) 22%, var(--border));
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(160deg,
+      color-mix(in srgb, var(--surface-1) 95%, transparent) 0%,
+      color-mix(in srgb, var(--surface-2) 90%, transparent) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  z-index: 20;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 7%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--svc-magenta) 10%, transparent),
+    0 0 48px -12px color-mix(in srgb, var(--svc-magenta) 28%, transparent),
+    0 24px 64px -16px rgba(0,0,0,0.7);
+}
+
+/* Header */
+.lc-chat-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px 11px;
+  border-bottom: 1px solid color-mix(in srgb, var(--svc-magenta) 12%, var(--border));
+  flex-shrink: 0;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--svc-magenta) 6%, transparent) 0%,
+    transparent 60%);
+}
+.lc-chat-title {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--svc-magenta);
+  text-transform: uppercase;
+  display: flex; align-items: center; gap: 7px;
+}
+.lc-chat-title::before {
+  content: '✦';
+  font-size: 9px;
+  opacity: 0.8;
+}
+.lc-chat-close {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-3); font-size: 12px; padding: 4px 6px;
+  line-height: 1; border-radius: var(--radius-sm);
+  transition: color var(--dur-fast) var(--ease-std), background var(--dur-fast) var(--ease-std);
+}
+.lc-chat-close:hover { color: var(--text-1); background: rgba(255,255,255,0.06); }
+
+/* Body */
+.lc-chat-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+.lc-chat-body::-webkit-scrollbar { width: 4px; }
+.lc-chat-body::-webkit-scrollbar-track { background: transparent; }
+.lc-chat-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.lc-chat-empty {
+  color: var(--text-3);
+  font-size: 12.5px;
+  line-height: 1.7;
+  text-align: center;
+  margin: auto;
+  padding: 24px 20px;
+}
+.lc-chat-empty::before {
+  content: '✦';
+  display: block;
+  font-size: 20px;
+  color: color-mix(in srgb, var(--svc-magenta) 50%, transparent);
+  margin-bottom: 10px;
+  animation: lc-pulse 3s ease-in-out infinite;
+}
+@keyframes lc-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+.lc-chat-empty code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+/* Messages */
+.lc-chat-msg { display: flex; align-items: flex-end; gap: 8px; }
+.lc-chat-msg--user { justify-content: flex-end; }
+.lc-chat-msg--assistant { justify-content: flex-start; }
+
+.lc-chat-bubble {
+  max-width: 86%;
+  padding: 9px 13px;
+  font-size: 13px;
+  line-height: 1.6;
+  word-break: break-word;
+}
+.lc-chat-msg--user .lc-chat-bubble {
+  background: linear-gradient(135deg, var(--svc-magenta) 0%, color-mix(in srgb, var(--svc-magenta) 80%, var(--svc-violet)) 100%);
+  color: #fff;
+  border-radius: 16px 16px 4px 16px;
+  box-shadow: 0 2px 16px -4px color-mix(in srgb, var(--svc-magenta) 50%, transparent);
+}
+.lc-chat-msg--assistant .lc-chat-bubble {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-left: 2px solid color-mix(in srgb, var(--svc-magenta) 45%, var(--svc-violet));
+  color: var(--text-1);
+  border-radius: 4px 16px 16px 16px;
+}
+
+/* Streaming cursor */
+.lc-chat-cursor {
+  display: inline-block;
+  width: 2px; height: 13px;
+  background: var(--svc-magenta);
+  margin-left: 3px;
+  vertical-align: text-bottom;
+  border-radius: 1px;
+  animation: lc-blink 0.8s ease-in-out infinite;
+}
+@keyframes lc-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* Footer */
+.lc-chat-footer {
+  display: flex; align-items: flex-end; gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid color-mix(in srgb, var(--svc-magenta) 10%, var(--border));
+  flex-shrink: 0;
+  background: linear-gradient(0deg, color-mix(in srgb, var(--surface-1) 60%, transparent), transparent);
+}
+.lc-chat-input {
+  flex: 1;
+  resize: none;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px;
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 8px 12px;
+  max-height: 96px;
+  overflow-y: auto;
+  outline: none;
+  transition: border-color 200ms var(--ease-std), box-shadow 200ms var(--ease-std);
+}
+.lc-chat-input:focus {
+  border-color: color-mix(in srgb, var(--svc-magenta) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--svc-magenta) 12%, transparent);
+}
+.lc-chat-input::placeholder { color: var(--text-3); }
+.lc-chat-send {
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, var(--svc-magenta) 0%, color-mix(in srgb, var(--svc-magenta) 80%, var(--svc-violet)) 100%);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: opacity var(--dur-fast) var(--ease-std), box-shadow var(--dur-fast) var(--ease-std);
+  box-shadow: 0 2px 10px -2px color-mix(in srgb, var(--svc-magenta) 45%, transparent);
+}
+.lc-chat-send:disabled { opacity: 0.3; cursor: default; box-shadow: none; }
+.lc-chat-send:not(:disabled):hover { opacity: 0.88; box-shadow: 0 4px 16px -2px color-mix(in srgb, var(--svc-magenta) 60%, transparent); }
+
+/* Markdown content */
+.lc-chat-bubble--streaming { white-space: pre-wrap; }
+.lc-chat-bubble--md p { margin: 0 0 7px; }
+.lc-chat-bubble--md p:last-child { margin-bottom: 0; }
+.lc-chat-bubble--md ul,
+.lc-chat-bubble--md ol { margin: 4px 0 7px; padding-left: 18px; }
+.lc-chat-bubble--md li { margin-bottom: 3px; }
+.lc-chat-bubble--md code {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--svc-cyan);
+}
+.lc-chat-bubble--md pre {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+.lc-chat-bubble--md pre code { background: none; border: none; padding: 0; color: var(--text-1); }
+.lc-chat-bubble--md strong { font-weight: 600; color: var(--text-1); }
+.lc-chat-bubble--md h1,
+.lc-chat-bubble--md h2,
+.lc-chat-bubble--md h3 {
+  font-size: 13.5px;
+  font-weight: 700;
+  margin: 10px 0 5px;
+  color: var(--text-1);
+  letter-spacing: 0.01em;
+}
+.lc-chat-bubble--md a { color: var(--svc-cyan); text-decoration: underline; }
+.lc-chat-bubble--md table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 12px; }
+.lc-chat-bubble--md th,
+.lc-chat-bubble--md td { border: 1px solid rgba(255,255,255,0.08); padding: 5px 10px; text-align: left; }
+.lc-chat-bubble--md th {
+  background: color-mix(in srgb, var(--svc-magenta) 8%, rgba(255,255,255,0.04));
+  font-weight: 600;
+  color: var(--text-1);
+  letter-spacing: 0.03em;
+}
+.lc-chat-bubble--md tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+/* ════════════════════════════════════════════════════════════
+   Intro — cosmos welcome (starfield + orbital centerpiece + stagger)
+   ════════════════════════════════════════════════════════════ */
+.lc-intro {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: #04060A;
+  overflow: hidden;
+  /* Sits ABOVE the warp (z=110) so the warp can run underneath while
+     the intro fades out and dissolves to reveal it. */
+  z-index: 120;
+}
+.lc-starfield {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.lc-intro-orbits {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 0 30px rgba(80, 60, 180, 0.18));
+  animation: lc-intro-orbits-rot 220s linear infinite;
+}
+@keyframes lc-intro-orbits-rot {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.lc-intro-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 60% at 50% 50%, transparent 0%, transparent 35%, rgba(4,6,10,0.35) 70%, rgba(4,6,10,0.92) 100%);
+  pointer-events: none;
+}
+
+.lc-intro-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 640px;
+  padding: 0 24px;
+  z-index: 2;
+}
+.lc-intro-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 28px;
+  position: relative;
+  padding: 0 14px;
+}
+.lc-intro-eyebrow::before,
+.lc-intro-eyebrow::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 38px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--text-3));
+  opacity: 0.5;
+}
+.lc-intro-eyebrow::before { right: 100%; transform: translateY(-50%); }
+.lc-intro-eyebrow::after  { left: 100%; transform: translateY(-50%) scaleX(-1); }
+
+.lc-intro-title {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 7.5vw, 84px);
+  font-weight: 500;
+  letter-spacing: -0.028em;
+  line-height: 1.02;
+  color: var(--text-1);
+  margin: 0 0 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.lc-intro-title-line {
+  display: inline-block;
+}
+.lc-intro-title-line--accent {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  background: linear-gradient(95deg,
+    color-mix(in srgb, var(--accent) 90%, white 10%) 0%,
+    color-mix(in srgb, var(--svc-violet) 65%, white 35%) 60%,
+    color-mix(in srgb, var(--svc-cyan) 70%, white 30%) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.lc-intro-sub {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text-2);
+  margin: 0 0 40px;
+  max-width: 52ch;
+}
+.lc-intro-cta-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.lc-intro-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 22px 13px 24px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  border: 0;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 70%, transparent),
+              0 0 60px -10px color-mix(in srgb, var(--accent) 80%, transparent);
+  transition: transform var(--dur-fast) var(--ease-std), box-shadow var(--dur-mid) var(--ease-std);
+}
+.lc-intro-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 80%, transparent),
+              0 0 90px -8px color-mix(in srgb, var(--accent) 95%, transparent);
+}
+.lc-intro-cta-glyph {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0;
+  transition: transform var(--dur-mid) var(--ease-out);
+}
+.lc-intro-cta:hover .lc-intro-cta-glyph { transform: translateX(4px); }
+.lc-intro-hint {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  opacity: 0.8;
+}
+
+/* ════════════════════════════════════════════════════════════
+   Cyberpunk pass — neon accents, rounder corners, glowing borders.
+   Layered AFTER base chrome rules above, so they override.
+   ════════════════════════════════════════════════════════════ */
+
+/* Topbar — chromed hairline + faint scan line. */
+.lc-topbar {
+  border-bottom: 0;
+  position: relative;
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--bg) 96%, transparent) 0%,
+      color-mix(in srgb, var(--bg) 88%, transparent) 100%);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 4%, transparent),
+    0 1px 0 0 color-mix(in srgb, var(--accent) 18%, transparent),
+    0 12px 36px -16px rgba(0, 0, 0, 0.7);
+}
+.lc-topbar::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--svc-cyan) 60%, transparent) 18%,
+    color-mix(in srgb, var(--accent) 80%, transparent) 50%,
+    color-mix(in srgb, var(--svc-violet) 60%, transparent) 82%,
+    transparent 100%);
+  opacity: 0.45;
+  pointer-events: none;
+}
+.lc-topbar-strip {
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+}
+
+/* Brand wordmark — subtle mono-glow. */
+.lc-topbar-brand {
+  text-shadow: 0 0 18px color-mix(in srgb, white 10%, transparent);
+}
+
+/* Domain tabs — rounder, glowing active. */
+.lc-domain-tabs {
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--bg-surface) 70%, transparent);
+}
+.lc-domain-tab {
+  padding: 7px 14px;
+}
+.lc-domain-tab[data-active='true'] {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 100%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 88%, transparent) 100%);
+  color: var(--accent-fg);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 30%, transparent),
+    0 0 18px -2px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+/* Scenario picker — rounder, neon edge on hover/open. */
+.lc-picker-toggle {
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--bg-surface) 92%, transparent) 0%,
+      color-mix(in srgb, var(--bg-surface-2) 92%, transparent) 100%);
+  box-shadow: inset 0 1px 0 0 color-mix(in srgb, white 4%, transparent);
+  transition: border-color var(--dur-mid) var(--ease-std), box-shadow var(--dur-mid) var(--ease-std);
+}
+.lc-picker-toggle:hover {
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 6%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--c) 28%, transparent);
+}
+.lc-picker-toggle[aria-expanded='true'] {
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 6%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--c) 60%, transparent),
+    0 0 22px -6px color-mix(in srgb, var(--c) 70%, transparent);
+}
+.lc-picker-menu {
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--bg-elevated) 96%, transparent) 0%,
+      color-mix(in srgb, var(--bg-elevated) 90%, transparent) 100%);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 5%, transparent),
+    0 24px 60px -20px rgba(0, 0, 0, 0.85),
+    0 0 0 1px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.lc-picker-item { border-radius: var(--radius-lg); }
+.lc-picker-item[data-active='true'] {
+  background: color-mix(in srgb, var(--c) 8%, transparent);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--c) 50%, transparent),
+    0 0 18px -6px color-mix(in srgb, var(--c) 60%, transparent);
+}
+
+/* Play / step buttons — rounder, neon hover halos. */
+.lc-pb-btn {
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--bg-surface) 92%, transparent) 0%,
+    color-mix(in srgb, var(--bg-surface-2) 92%, transparent) 100%);
+  box-shadow: inset 0 1px 0 0 color-mix(in srgb, white 4%, transparent);
+}
+.lc-pb-btn:hover:not(:disabled) {
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 6%, transparent),
+    0 0 14px -4px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+.lc-pb-play {
+  border-radius: var(--radius-xl);
+  /* Force the accent bg back — the .lc-pb-btn cyberpunk gradient
+     would otherwise dark-on-dark the play triangle. */
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 100%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 86%, transparent) 100%) !important;
+  color: #FFFFFF;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  border-color: var(--accent);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 35%, transparent),
+    0 0 22px -6px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.lc-pb-play:hover:not(:disabled) {
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 50%, transparent),
+    0 0 36px -6px color-mix(in srgb, var(--accent) 95%, transparent);
+}
+.lc-pb-group { border-radius: var(--radius-xl); overflow: hidden; }
+.lc-pb-pill { border-radius: 0; }
+.lc-pb-pill--solo {
+  border-radius: var(--radius-xl);
+  box-shadow: inset 0 1px 0 0 color-mix(in srgb, white 4%, transparent);
+}
+.lc-pb-pill[data-active='true'] {
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 30%, transparent),
+    0 0 16px -4px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* Step strip in topbar — slightly larger, slight glow on current. */
+.lc-stripe-dot[data-current='true'] {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 60%, transparent),
+    0 0 10px 1px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+/* Map zoom controls — rounder, accented hover. */
+.lc-map-zoom {
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--surface-1) 80%, transparent);
+}
+.lc-map-zoom-btn {
+  width: 36px;
+  border-radius: 0;
+}
+.lc-map-zoom-btn:hover {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+}
+
+/* Step explainer panel (right side) — rounder, accent gradient border. */
+.lc-step-panel {
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--surface-1) 90%, transparent) 0%,
+      color-mix(in srgb, var(--surface-1) 82%, transparent) 100%);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 5%, transparent),
+    0 24px 60px -24px rgba(0, 0, 0, 0.8),
+    0 0 0 1px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.lc-step-panel::before {
+  content: '';
+  position: absolute;
+  left: 14px; right: 14px; top: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 60%, transparent) 50%,
+    transparent);
+  opacity: 0.55;
+}
+.lc-step-panel-close { border-radius: var(--radius-lg); }
+.lc-step-panel-close:hover {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+/* Inspector panel (LEFT side, for service / topic clicks) — distinct
+   angular treatment so it doesn't get confused with the step explainer.
+   Sized to its content (not pinned to bottom). */
+.lc-map-panel {
+  right: auto !important;
+  left: 14px !important;
+  bottom: auto !important;
+  width: 340px;
+  max-height: calc(100% - 28px);
+  height: auto;
+  border-radius: 2px var(--radius-xl) 2px var(--radius-xl);
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+  background:
+    linear-gradient(160deg,
+      color-mix(in srgb, var(--surface-1) 92%, transparent) 0%,
+      color-mix(in srgb, var(--surface-2) 88%, transparent) 100%);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 6%, transparent),
+    0 24px 60px -24px rgba(0, 0, 0, 0.85),
+    0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent),
+    0 0 40px -12px color-mix(in srgb, var(--accent) 22%, transparent);
+  padding-left: 28px;
+}
+/* Vertical accent spine — the visual marker that this is an inspector. */
+.lc-map-panel-spine {
+  position: absolute;
+  top: 18px; bottom: 18px; left: 8px;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 100%, transparent),
+    color-mix(in srgb, var(--svc-violet) 70%, transparent) 50%,
+    color-mix(in srgb, var(--svc-cyan) 70%, transparent));
+  opacity: 0.85;
+  box-shadow: 0 0 12px -2px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.lc-map-panel-close { border-radius: var(--radius-md); }
+.lc-map-panel-close:hover {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+/* Activity log — same neon treatment. */
+.lc-activity {
+  border-radius: var(--radius-xl);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 5%, transparent),
+    0 16px 40px -16px rgba(0, 0, 0, 0.8),
+    0 0 0 1px color-mix(in srgb, var(--svc-violet) 14%, transparent);
+}
+.lc-activity-row { border-radius: var(--radius-md); }
+
+/* Step panel body fade wrapper. */
+.lc-step-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Topbar eyebrow color punch. */
+.lc-topbar-eyebrow {
+  color: color-mix(in srgb, var(--accent) 30%, var(--text-3));
+}
+
+/* ── Map node / edge dimming ────────────────────────────────
+   When a scenario is selected, unrelated nodes/edges fade WAY out
+   plus blur slightly so the active flow is the only thing in focus. */
+.lc-service-node,
+.lc-topic-node {
+  cursor: pointer;
+  opacity: 1;
+  transition: opacity 900ms cubic-bezier(0.25, 0.1, 0.25, 1),
+              filter 900ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.lc-service-node[data-dimmed='true'],
+.lc-topic-node[data-dimmed='true'] {
+  opacity: 0.08;
+  filter: blur(1.6px) saturate(0.35);
+}
+/* Topic group fan-out — expanded members pop from the hub onto their ring
+   position, staggered like a radial speed-dial menu opening. */
+.lc-group-pop {
+  animation: lc-group-pop 420ms cubic-bezier(0.34, 1.35, 0.4, 1) both;
+}
+@keyframes lc-group-pop {
+  from {
+    opacity: 0;
+    transform: translate(var(--pop-dx, 0), var(--pop-dy, 0));
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+/* Sub-services use a milder dim — they're inside an expanded ecosystem
+   where the user has already chosen to focus, so we hint "not in path"
+   without making them invisible. */
+.lc-sub-service-node {
+  transition: opacity 380ms cubic-bezier(0.2, 0.9, 0.3, 1.1),
+              filter 380ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+.lc-sub-service-node[data-dimmed='true'] {
+  opacity: 0.22;
+  filter: blur(0.6px) saturate(0.55);
+}
+.lc-edge {
+  stroke-opacity: 0.32;
+  transition: stroke-opacity 900ms cubic-bezier(0.25, 0.1, 0.25, 1),
+              filter 900ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.lc-edge[data-dimmed='true'] {
+  stroke-opacity: 0.04;
+  filter: blur(1px);
+}
+
+/* ── GitHub repo link in service panel ─────────────────────── */
+.lc-map-panel-repo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 3px 9px 3px 7px;
+  width: fit-content;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--bg-surface) 70%, transparent);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std), background var(--dur-fast) var(--ease-std);
+}
+.lc-map-panel-repo svg { display: block; opacity: 0.85; }
+.lc-map-panel-repo:hover {
+  color: var(--text-1);
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* ── Help button + modal ───────────────────────────────────── */
+.lc-help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--bg-surface) 92%, transparent) 0%,
+    color-mix(in srgb, var(--bg-surface-2) 92%, transparent) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-2);
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std), box-shadow var(--dur-fast) var(--ease-std);
+  box-shadow: inset 0 1px 0 0 color-mix(in srgb, white 5%, transparent);
+}
+.lc-help-btn:hover {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--border));
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 6%, transparent),
+    0 0 18px -4px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.lc-help-overlay {
+  position: fixed;
+  inset: 0;
+  /* Above the topbar (20) and even above the intro/warp (120/110) so
+     the user can always reach Help. */
+  z-index: 200;
+  display: flex;
+  align-items: center;       /* vertical center */
+  justify-content: center;   /* horizontal center */
+  background: rgba(2, 4, 12, 0.6);
+  /* Subtle defocus — readable, not muddy. */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.lc-help-modal {
+  position: relative;
+  width: min(720px, calc(100vw - 48px));
+  /* Sized to content. No internal scrollbar — the modal grows to fit
+     and the flex parent centers it on both axes. */
+  overflow: visible;
+  padding: 32px 36px 28px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--surface-1) 96%, transparent) 0%,
+      color-mix(in srgb, var(--surface-2) 92%, transparent) 100%);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 6%, transparent),
+    0 32px 80px -32px rgba(0, 0, 0, 0.85),
+    0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent),
+    0 0 60px -10px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.lc-help-modal::before {
+  content: '';
+  position: absolute;
+  left: 18px; right: 18px; top: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    color-mix(in srgb, var(--accent) 70%, transparent) 30%,
+    color-mix(in srgb, var(--svc-violet) 70%, transparent) 70%,
+    transparent);
+  opacity: 0.6;
+}
+.lc-help-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px; height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--bg-surface) 80%, transparent);
+  color: var(--text-1);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-std), border-color var(--dur-fast) var(--ease-std), background var(--dur-fast) var(--ease-std), transform var(--dur-fast) var(--ease-out);
+  z-index: 1;
+}
+.lc-help-close:active { transform: scale(0.92); }
+.lc-help-close:hover {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.lc-help-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent) 30%, var(--text-3));
+  margin-bottom: 8px;
+}
+.lc-help-title {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.022em;
+  line-height: 1.15;
+  color: var(--text-1);
+}
+.lc-help-lede {
+  margin: 0 0 22px;
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-2);
+  max-width: 60ch;
+}
+.lc-help-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 26px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+@media (max-width: 600px) {
+  .lc-help-grid { grid-template-columns: 1fr; }
+}
+.lc-help-section { display: flex; flex-direction: column; gap: 8px; }
+.lc-help-section-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.lc-help-section ul,
+.lc-help-section ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-2);
+}
+.lc-help-section ol { counter-reset: helpsteps; }
+.lc-help-section ol li {
+  counter-increment: helpsteps;
+  padding-left: 22px;
+  position: relative;
+}
+.lc-help-section ol li::before {
+  content: counter(helpsteps);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  border-radius: 50%;
+}
+.lc-help-section em {
+  font-style: italic;
+  color: var(--text-1);
+}
+.lc-help-kbd {
+  display: inline-block;
+  padding: 1px 7px;
+  margin: 0 2px;
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--text-1);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.lc-help-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+  padding: 12px 14px;
+  border: 1px dashed color-mix(in srgb, var(--accent) 30%, var(--border));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+.lc-help-foot-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ── Tech stack row in service panel ───────────────────────── */
+.lc-tech-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.lc-tech-icon {
+  --tech-color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tech-color) 90%, white 0%) 0%,
+    color-mix(in srgb, var(--tech-color) 78%, black 6%) 100%);
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in srgb, white 22%, transparent),
+    0 0 8px -2px color-mix(in srgb, var(--tech-color) 60%, transparent);
+  flex-shrink: 0;
+}
+.lc-tech-chip {
+  --tech-color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px 4px 4px;
+  border: 1px solid color-mix(in srgb, var(--tech-color) 35%, var(--border));
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--tech-color) 8%, transparent);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--text-1);
+  transition: border-color var(--dur-fast) var(--ease-std), background var(--dur-fast) var(--ease-std);
+}
+.lc-tech-chip:hover {
+  border-color: color-mix(in srgb, var(--tech-color) 65%, var(--border));
+  background: color-mix(in srgb, var(--tech-color) 14%, transparent);
+}
+.lc-tech-chip-label {
+  color: var(--text-1);
+}
