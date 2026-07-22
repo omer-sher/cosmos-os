@@ -103,7 +103,7 @@
   </g>
 
   <!-- ══ wordmark (left side) ══ -->
-  <text x="84" y="172" font-size="84" font-weight="700" letter-spacing="14" fill="url(#wordmark)">COSMOS</text>
+  <text x="84" y="172" font-size="76" font-weight="700" letter-spacing="10" fill="url(#wordmark)">THE COSMOS</text>
   <text x="88" y="212" font-size="19" fill="#aab3bd" letter-spacing="1">a living map of your architecture</text>
   <g font-size="12.5" fill="#6d7680" font-family="ui-monospace, 'SF Mono', Menlo, monospace">
     <text x="88" y="252">services as stars · flows as comets · honesty as a nightly agent</text>
