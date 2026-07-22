@@ -25,9 +25,9 @@
       <stop offset="100%" stop-color="#f5b731" stop-opacity="0.9"/>
     </linearGradient>
     <linearGradient id="serifgrad" gradientUnits="userSpaceOnUse" x1="261" y1="176.0" x2="494" y2="136.0">
-      <stop offset="0%" stop-color="#C9EDBB"/>
-      <stop offset="40%" stop-color="#C6B4FC"/>
-      <stop offset="100%" stop-color="#64E0F3"/>
+      <stop offset="0%" stop-color="#F2D98B"/>
+      <stop offset="50%" stop-color="#F0A9CF"/>
+      <stop offset="100%" stop-color="#7FC1F7"/>
     </linearGradient>
   </defs>
 
