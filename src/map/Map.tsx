@@ -668,8 +668,8 @@ export function CosmosMap({
           </button>
         </div>
 
-        {/* Layout edit mode controls — dev only */}
-        {import.meta.env.DEV && <div className="lc-layout-controls" data-no-pan="true" data-active={layoutMode ? 'true' : 'false'}>
+        {/* Layout edit mode controls */}
+        {<div className="lc-layout-controls" data-no-pan="true" data-active={layoutMode ? 'true' : 'false'}>
           {layoutMode ? (
             <>
               <button type="button" className="lc-layout-btn lc-layout-btn--done" onClick={() => setLayoutMode(false)}>
