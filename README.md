@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/assets/cosmos-banner.svg" alt="Cosmos — a living map of your architecture" width="100%">
+</p>
+
 # Cosmos
 
 **A living map of your architecture.** Every service is a star. Kafka topics orbit between them. Real flows play as comets you can watch, pause, and inspect — payloads included. And a nightly AI agent keeps the whole map honest against your actual code.
