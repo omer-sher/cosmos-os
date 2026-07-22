@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { DOMAINS } from '../scenarios/data';
 
 interface DeepLinkState {
   domain: string | null;
@@ -16,7 +17,7 @@ export function useDeepLink(state: DeepLinkState) {
     const url = new URL(window.location.href);
     const params = url.searchParams;
 
-    if (state.domain && state.domain !== 'shopping') params.set('domain', state.domain);
+    if (state.domain && state.domain !== DOMAINS[0].id) params.set('domain', state.domain);
     else params.delete('domain');
 
     if (state.scenario) params.set('scenario', state.scenario);

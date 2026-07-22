@@ -14,7 +14,7 @@ import { Spotlight } from './components/Spotlight';
 import type { SpotlightTarget } from './components/Spotlight';
 import { BrandStarfield } from './map/BrandStarfield';
 
-import { SCENARIOS_BY_ID } from './scenarios/data';
+import { DOMAINS, SCENARIOS_BY_ID } from './scenarios/data';
 import type { Step } from './scenarios/types';
 import { useScenarioRunner } from './scenarios/runner';
 import type { Shot } from './scenarios/runner';
@@ -29,7 +29,7 @@ export function App() {
   );
   // Plays the hyperspace warp between the intro CTA and the cosmos shell.
   const [warping, setWarping] = useState(false);
-  const [activeDomain, setActiveDomain] = useState(() => initial.domain ?? 'shopping');
+  const [activeDomain, setActiveDomain] = useState(() => initial.domain ?? DOMAINS[0].id);
 
   const runner = useScenarioRunner();
   const { state, steps, scenario, setScenario, jumpTo, completeCurrentShot, onShot } = runner;

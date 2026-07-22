@@ -13,8 +13,9 @@
   <a href="#drift-sync">Drift Sync</a>
 </p>
 
-<!-- screenshot: full cosmos map -->
-<!-- gif: a scenario playing -->
+<p align="center">
+  <img src=".github/assets/shot-map.png" alt="The AstroMart demo cosmos — services as stars grouped into shopping, fulfillment and engagement nebulas" width="100%">
+</p>
 
 ## Why
 
@@ -43,6 +44,10 @@ npm run dev
 ```
 
 Open http://localhost:5173 — you're looking at **AstroMart**, a fictional space-gear e-commerce platform that ships with the repo as demo data. Pick a domain, choose a scenario (start with *Place an order*), press play.
+
+<p align="center">
+  <img src=".github/assets/shot-scenario.png" alt="The Place an order scenario playing — step panel with the real payload, playback controls, map isolated to the involved services" width="100%">
+</p>
 
 ## Make it your cosmos
 

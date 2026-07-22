@@ -14,7 +14,8 @@
     "sync:diff-repo": "tsx drift-sync/scripts/diff-repo.ts",
     "sync:nightly": "tsx drift-sync/scripts/sync-nightly.ts",
     "sync:apply": "tsx drift-sync/scripts/apply-edits.ts",
-    "sync:clone-repos": "tsx drift-sync/scripts/clone-repos.ts"
+    "sync:clone-repos": "tsx drift-sync/scripts/clone-repos.ts",
+    "fresh": "node scripts/fresh-start.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",
