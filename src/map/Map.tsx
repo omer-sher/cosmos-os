@@ -316,9 +316,9 @@ export function CosmosMap({
       g.members.forEach((m, i) => {
         if (collapsed) {
           out[m.id] = { x: cx, y: cy };
-        } else if (!overrides[m.id]) {
-          // A hand-dragged member keeps its manual position; only
-          // untouched members follow the computed ring.
+        } else if (!overrides[m.id] && !m.pinned) {
+          // Hand-dragged or pinned members keep their own position;
+          // only untouched members follow the computed ring.
           const p = radialMemberPosition(g, i);
           out[m.id] = { x: p.x + (cx - g.cx), y: p.y + (cy - g.cy) };
         }
@@ -335,7 +335,8 @@ export function CosmosMap({
     for (const g of TOPIC_GROUPS) {
       if (collapsedMemberIds.has(g.members[0].id)) continue;
       g.members.forEach((m, i) => {
-        const pos = radialMemberPosition(g, i);
+        // Pinned members pop out to their hand-placed coords, not a ring slot.
+        const pos = m.pinned ? { x: m.x, y: m.y, above: m.y < g.cy } : radialMemberPosition(g, i);
         meta.set(m.id, { idx: i, above: pos.above, dx: g.cx - pos.x, dy: g.cy - pos.y });
       });
     }
@@ -436,7 +437,7 @@ export function CosmosMap({
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([id, { x, y }]) => {
         const isTopic = !!TOPICS_BY_ID[id];
-        return `'${id}': x=${x}, y=${y}${isTopic ? '  (topic — also set pinned: true to keep it off the auto ring)' : ''}`;
+        return `'${id}': x=${x}, y=${y}${isTopic ? '  (topic — also set pinned: true so the fan-out uses these coords)' : ''}`;
       })
       .join('\n');
     navigator.clipboard.writeText(lines || '(no overrides yet)');
@@ -636,7 +637,7 @@ export function CosmosMap({
                     onPointerDown={layoutMode ? (e) => handleDragStart(t.id, e) : undefined}
                   >
                     <TopicNode
-                      topic={meta ? { ...t, labelSide: meta.above ? 'above' : 'below' } : t}
+                      topic={meta ? { ...t, labelSide: t.labelSide ?? (meta.above ? 'above' : 'below') } : t}
                       selected={(selection?.kind === 'topic' && selection.id === t.id) || currentShotSet.has(t.id)}
                       dimmed={isNodeDim(t.id)}
                       showLabel={!!meta || topicLabelVisible(t.x, t.y) || (scenarioNodeSet?.has(t.id) ?? false)}
