@@ -335,14 +335,20 @@ export function CosmosMap({
     for (const g of TOPIC_GROUPS) {
       if (collapsedMemberIds.has(g.members[0].id)) continue;
       g.members.forEach((m, i) => {
-        // Pinned members pop out to their hand-placed coords, not a ring slot.
-        const pos = m.pinned ? { x: m.x, y: m.y, above: m.y < g.cy } : radialMemberPosition(g, i);
+        // Members pop out from the owner to wherever they actually land:
+        // a live drag override, pinned hand-placed coords, or the ring slot.
+        const o = overrides[m.id];
+        const pos = o
+          ? { x: o.x, y: o.y, above: o.y < g.cy }
+          : m.pinned
+            ? { x: m.x, y: m.y, above: m.y < g.cy }
+            : radialMemberPosition(g, i);
         meta.set(m.id, { idx: i, above: pos.above, dx: g.cx - pos.x, dy: g.cy - pos.y });
       });
     }
     return meta;
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by which groups are collapsed
-  }, [collapsedKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by which groups are collapsed + dragged positions
+  }, [collapsedKey, overrides]);
 
   // Collapsed topic count per owner service — shown as a card badge.
   const collapsedCountByService = useMemo(() => {
@@ -616,9 +622,7 @@ export function CosmosMap({
               {displayTopics
                 .filter((t) => CONNECTED_NODE_IDS.has(t.id) && !collapsedMemberIds.has(t.id))
                 .map((t) => {
-                // A manual drag detaches the member from the ring's pop
-                // animation/label meta — it renders as a free dot.
-                const meta = overrides[t.id] ? undefined : expandedMemberMeta.get(t.id);
+                const meta = expandedMemberMeta.get(t.id);
                 return (
                   <g
                     key={t.id}
