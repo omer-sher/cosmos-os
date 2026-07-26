@@ -343,7 +343,16 @@ export function CosmosMap({
           : m.pinned
             ? { x: m.x, y: m.y, above: m.y < g.cy }
             : radialMemberPosition(g, i);
-        meta.set(m.id, { idx: i, above: pos.above, dx: g.cx - pos.x, dy: g.cy - pos.y });
+        // Cap the pop travel at the ring radius so far-pinned members get
+        // the same short speed-dial hop as ring members, not a cross-map flight.
+        let dx = g.cx - pos.x;
+        let dy = g.cy - pos.y;
+        const len = Math.hypot(dx, dy);
+        if (len > g.ringRadius) {
+          dx = (dx / len) * g.ringRadius;
+          dy = (dy / len) * g.ringRadius;
+        }
+        meta.set(m.id, { idx: i, above: pos.above, dx, dy });
       });
     }
     return meta;
