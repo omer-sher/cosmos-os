@@ -87,6 +87,7 @@ export const TOPIC_GROUPS: TopicGroup[] = (() => {
   const byOwner = new Map<string, Topic[]>();
   for (const t of TOPICS) {
     if (!CONNECTED_NODE_IDS.has(t.id)) continue;
+    if (t.pinned) continue; // pinned topics keep their own coords, outside any ring
     const owner = ownerServiceId(t);
     if (!owner) continue;
     const list = byOwner.get(owner) ?? [];

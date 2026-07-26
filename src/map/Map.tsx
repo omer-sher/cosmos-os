@@ -316,7 +316,9 @@ export function CosmosMap({
       g.members.forEach((m, i) => {
         if (collapsed) {
           out[m.id] = { x: cx, y: cy };
-        } else {
+        } else if (!overrides[m.id]) {
+          // A hand-dragged member keeps its manual position; only
+          // untouched members follow the computed ring.
           const p = radialMemberPosition(g, i);
           out[m.id] = { x: p.x + (cx - g.cx), y: p.y + (cy - g.cy) };
         }
@@ -432,7 +434,10 @@ export function CosmosMap({
   function copyCoordinates() {
     const lines = Object.entries(overridesRef.current)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([id, { x, y }]) => `'${id}': x=${x}, y=${y}`)
+      .map(([id, { x, y }]) => {
+        const isTopic = !!TOPICS_BY_ID[id];
+        return `'${id}': x=${x}, y=${y}${isTopic ? '  (topic — also set pinned: true to keep it off the auto ring)' : ''}`;
+      })
       .join('\n');
     navigator.clipboard.writeText(lines || '(no overrides yet)');
     setCopied(true);
@@ -610,7 +615,9 @@ export function CosmosMap({
               {displayTopics
                 .filter((t) => CONNECTED_NODE_IDS.has(t.id) && !collapsedMemberIds.has(t.id))
                 .map((t) => {
-                const meta = expandedMemberMeta.get(t.id);
+                // A manual drag detaches the member from the ring's pop
+                // animation/label meta — it renders as a free dot.
+                const meta = overrides[t.id] ? undefined : expandedMemberMeta.get(t.id);
                 return (
                   <g
                     key={t.id}
@@ -626,7 +633,7 @@ export function CosmosMap({
                           ? { cursor: 'grab' }
                           : undefined
                     }
-                    onPointerDown={layoutMode && !meta ? (e) => handleDragStart(t.id, e) : undefined}
+                    onPointerDown={layoutMode ? (e) => handleDragStart(t.id, e) : undefined}
                   >
                     <TopicNode
                       topic={meta ? { ...t, labelSide: meta.above ? 'above' : 'below' } : t}

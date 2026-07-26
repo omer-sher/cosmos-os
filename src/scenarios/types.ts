@@ -66,6 +66,11 @@ export interface Topic {
   y: number;
   /** When set, forces the label above or below the node. */
   labelSide?: 'above' | 'below';
+  /**
+   * Render at the hand-placed x/y and skip the owner ring/stack system.
+   * Use when the auto ring position collides with neighbors.
+   */
+  pinned?: boolean;
   /** Topic's wire name (mono caps). */
   name: string;
   /** CSS variable reference for the topic's color (defaults to --svc-orange). */
