@@ -132,4 +132,4 @@ PRs welcome — [CONTRIBUTING.md](CONTRIBUTING.md) has the dev setup and the thr
 
 ## License
 
-[MIT](LICENSE) © Omer Sher
+[MIT](LICENSE) © Ludeo
