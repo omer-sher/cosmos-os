@@ -57,7 +57,6 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 // and it skipped every edit (empty diff, no PR). reposRoot is then the
 // workspace dir that holds all repos.
 const cosmosRoot = path.resolve(here, '..', '..');
-const reposRoot = path.resolve(cosmosRoot, '..');
 
 // ──────────────────────────────────────────────────────────────────
 //  Load verdicts

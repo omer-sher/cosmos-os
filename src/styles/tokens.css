@@ -71,7 +71,7 @@
   --svc-magenta: oklch(0.76 0.16 320);
   --svc-orange:  oklch(0.76 0.16  56);
   --svc-teal:    oklch(0.80 0.13 188);
-  /* Extension hues — second wave of services (Capture-Moment, etc.) */
+  /* Extension hues — spare palette for future services */
   --svc-yellow:  oklch(0.84 0.16  82);
   --svc-rose:    oklch(0.74 0.18  10);
   --svc-purple:  oklch(0.72 0.18 305);

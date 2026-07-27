@@ -89,7 +89,7 @@ function readConfigFile(): ConfigFile {
   } catch (err) {
     // A malformed config is a setup error — fail loudly rather than
     // silently running with defaults that point at the wrong org.
-    throw new Error(`Could not parse ${configPath}: ${String(err)}`);
+    throw new Error(`Could not parse ${configPath}: ${String(err)}`, { cause: err });
   }
 }
 

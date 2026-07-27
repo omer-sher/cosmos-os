@@ -4,8 +4,8 @@
  * prompt so Claude knows what to compare the source diff against.
  */
 
-import { SERVICES, SERVICES_BY_ID } from '../../../src/scenarios/services.js';
-import { TOPICS, TOPICS_BY_ID } from '../../../src/scenarios/topics.js';
+import { SERVICES } from '../../../src/scenarios/services.js';
+import { TOPICS_BY_ID } from '../../../src/scenarios/topics.js';
 import { STEPS } from '../../../src/scenarios/data.js';
 import { resolveOwner } from '../../../src/scenarios/owners.js';
 import type { Service, Step, SubService, Topic } from '../../../src/scenarios/types.js';
@@ -21,20 +21,6 @@ export interface CosmosRepoSlice {
   topicRoles: { topicId: string; topicName: string; role: 'producer' | 'consumer' | 'both'; viaServiceId: string }[];
   /** Team(s) responsible. */
   teams: { team: string; githubTeam?: string; slack?: string; reviewers: string[] }[];
-}
-
-function reposForService(serviceId: string): string[] {
-  const svc = SERVICES_BY_ID[serviceId] as Service | undefined;
-  if (svc) {
-    const repos: string[] = [];
-    if (svc.repo) repos.push(svc.repo);
-    for (const sub of svc.subServices ?? []) {
-      if (sub.repo) repos.push(sub.repo);
-    }
-    return repos;
-  }
-  const sub = SERVICES.flatMap(s => s.subServices ?? []).find(s => s.id === serviceId) as SubService | undefined;
-  return sub?.repo ? [sub.repo] : [];
 }
 
 export function buildRepoSlice(repo: string): CosmosRepoSlice {

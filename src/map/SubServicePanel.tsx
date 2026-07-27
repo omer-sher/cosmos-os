@@ -1,5 +1,6 @@
 import type { Service, SubService } from '../scenarios/types';
 import { TechChip } from '../components/TechIcon';
+import { BRAND } from '../scenarios/brand';
 
 interface SubServicePanelProps {
   sub: SubService;
@@ -25,7 +26,7 @@ export function SubServicePanel({ sub, parent }: SubServicePanelProps) {
         {sub.repo && (
           <a
             className="lc-map-panel-repo"
-            href={`https://github.com/astromart/${sub.repo}`}
+            href={`${BRAND.repoBaseUrl}/${sub.repo}`}
             target="_blank"
             rel="noopener noreferrer"
             title="Open on GitHub"

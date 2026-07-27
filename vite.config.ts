@@ -5,5 +5,5 @@ export default defineConfig({
   // BASE_PATH is set by the Pages workflow (e.g. /cosmos-os/); local dev serves from /.
   base: process.env.BASE_PATH ?? '/',
   plugins: [react()],
-  server: { port: 5173, host: true },
+  server: { port: 5173 },
 });

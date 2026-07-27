@@ -1,5 +1,6 @@
 import type { Service } from '../scenarios/types';
 import { TechChip } from '../components/TechIcon';
+import { BRAND } from '../scenarios/brand';
 
 interface ServicePanelProps {
   service: Service;
@@ -20,7 +21,7 @@ export function ServicePanel({ service }: ServicePanelProps) {
         {service.repo && (
           <a
             className="lc-map-panel-repo"
-            href={`https://github.com/astromart/${service.repo}`}
+            href={`${BRAND.repoBaseUrl}/${service.repo}`}
             target="_blank"
             rel="noopener noreferrer"
             title="Open on GitHub"

@@ -12,6 +12,7 @@ npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build — must pass before a PR
 npm run validate   # data sanity checks (ids resolve, phaseIds unique, …)
+npm run lint       # eslint — must pass before a PR
 ```
 
 ## Data invariants (the ones that bite)
@@ -26,7 +27,7 @@ If you use [Claude Code](https://claude.com/claude-code), the repo ships with tw
 ## Pull requests
 
 - Fork → feature branch → PR against `main`.
-- `npm run build` and `npm run validate` must pass (CI checks both).
+- `npm run lint`, `npm run build`, and `npm run validate` must pass (CI checks all three, plus a drift-sync typecheck).
 - One logical change per PR. Screenshots/GIFs for anything visual are hugely appreciated.
 - New scenario for the AstroMart demo? Great — keep it fictional, keep payloads plausible, and showcase at least one mechanic (kafka `via:`, broadcast `through:`, `parallel:`, split storage hops).
 

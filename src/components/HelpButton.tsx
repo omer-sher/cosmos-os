@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { BRAND } from '../scenarios/brand';
 
 /**
  * "?" pill in the top-right that opens a modal explaining what the
@@ -66,7 +67,7 @@ export function HelpButton() {
               </button>
 
               <div className="lc-help-eyebrow">Welcome to the cosmos</div>
-              <h2 className="lc-help-title">A live map of the AstroMart platform.</h2>
+              <h2 className="lc-help-title">{BRAND.helpTitle}</h2>
               <p className="lc-help-lede">
                 Every star is a service, every dashed ring is a Kafka topic, every
                 line is a connection. Pick a scenario and watch a real request

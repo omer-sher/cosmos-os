@@ -28,7 +28,7 @@ loadEnv();
 
 import { loadSyncState } from './lib/git.js';
 import { TEAM_OWNERS, FALLBACK_OWNER } from '../../src/scenarios/owners.js';
-import type { TeamId, TeamOwner } from '../../src/scenarios/owners.js';
+import type { TeamOwner } from '../../src/scenarios/owners.js';
 import { buildHtmlReport } from './lib/report-html.js';
 import { sumUsage, estimateCost } from './lib/agent.js';
 import { loadDriftSyncConfig, slackGroupIdForTeam } from './lib/config.js';
@@ -729,7 +729,7 @@ if (!skipApplier && byTeam.size > 0) {
       // capturing the diff.
       if (!livePr) applierArgs.push('--dry-run');
 
-      let applierStdout = '';
+      let applierStdout: string;
       try {
         applierStdout = execFileSync('npx', applierArgs, { cwd: cosmosRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 64 * 1024 * 1024 }) || '';
 

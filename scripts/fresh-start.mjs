@@ -145,6 +145,20 @@ Headers:
 ];
 `);
 
+writeFileSync(dir('brand.ts'), `/**
+ * Universe branding — the strings that name YOUR system in the UI.
+ */
+export const BRAND = {
+  universeName: 'Your System',
+  badge: 'my cosmos',
+  tagline:
+    'A live map of your architecture. Pick a domain, pick a scenario, watch the request travel along constellations of services and topics.',
+  helpTitle: 'A live map of your platform.',
+  /** Base URL for \\\`Service.repo\\\` links (no trailing slash). */
+  repoBaseUrl: 'https://github.com/your-org',
+};
+`);
+
 writeFileSync(dir('data.ts'), `/** Barrel — re-exports every named symbol consumers import from this path. */
 export { SERVICES, SERVICES_BY_ID } from './services';
 export { TOPICS, TOPICS_BY_ID } from './topics';
@@ -163,6 +177,6 @@ export function stepsForScenario(scenario: Scenario): Step[] {
 
 console.log(`✦ Fresh cosmos ready: 2 services, 1 scenario ("Hello, cosmos").
   Next:
-    npm run dev            # see your minimal galaxy
-    /add-service <name>    # grow it with Claude Code
-    npm run build          # NOTE: default domain/UI ids may need a look if you renamed things`);
+    src/scenarios/brand.ts  # name your universe + set your GitHub org
+    npm run dev             # see your minimal galaxy
+    /add-service <name>     # grow it with Claude Code`);

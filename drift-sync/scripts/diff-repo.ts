@@ -53,8 +53,8 @@ const reposRoot = reposRootIdx >= 0
   : config.reposRoot;
 const model = modelIdx >= 0 ? args[modelIdx + 1] : 'claude-sonnet-4-6';
 const maxIter = maxIterIdx >= 0 ? Number(args[maxIterIdx + 1]) : 30;
-let explicitFrom = fromIdx >= 0 ? args[fromIdx + 1] : undefined;
-let explicitTo = toIdx >= 0 ? args[toIdx + 1] : undefined;
+const explicitFrom = fromIdx >= 0 ? args[fromIdx + 1] : undefined;
+const explicitTo = toIdx >= 0 ? args[toIdx + 1] : undefined;
 
 if (!repo || repo.startsWith('--')) {
   console.error('Usage: npm run sync:diff-repo -- <repo> [--from <sha>] [--to <sha>] [--json] [--verbose]');
@@ -165,11 +165,7 @@ if (changedFiles.length === 0) {
 }
 
 // Apply path filter then content filter.
-const diffUnifiedZero = getDiffUnifiedZero(repoPath, fromSha, toSha, changedFiles.filter(f => {
-  // Pre-filter at git level to reduce noise — only request diffs for files
-  // that pass the path filter. (Same filter is applied inside prefilterDecision.)
-  return true; // path filter happens inside prefilterDecision; we pass everything here for the diff
-}));
+const diffUnifiedZero = getDiffUnifiedZero(repoPath, fromSha, toSha, changedFiles);
 const decision = prefilterDecision(changedFiles, diffUnifiedZero);
 
 if (decision.skip) {

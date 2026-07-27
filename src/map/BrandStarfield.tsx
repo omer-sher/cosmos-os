@@ -116,7 +116,7 @@ export function BrandStarfield({
       // Shoot from a random edge across the canvas.
       const edge = Math.floor(Math.random() * 4);
       const speedPx = 380 + Math.random() * 220;
-      let x = 0, y = 0, vx = 0, vy = 0;
+      let x: number, y: number, vx: number, vy: number;
       if (edge === 0) {
         x = Math.random() * w; y = -20;
         const angle = (Math.PI / 2) + (Math.random() - 0.5) * 0.7;

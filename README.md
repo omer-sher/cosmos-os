@@ -4,6 +4,11 @@
 
 # The Cosmos
 
+[![Validate](https://github.com/ludeo-labs/cosmos-os/actions/workflows/validate-on-pr.yml/badge.svg)](https://github.com/ludeo-labs/cosmos-os/actions/workflows/validate-on-pr.yml)
+[![Live demo](https://img.shields.io/badge/demo-live-6f42c1)](https://ludeo-labs.github.io/cosmos-os/)
+[![Release](https://img.shields.io/github/v/release/ludeo-labs/cosmos-os)](https://github.com/ludeo-labs/cosmos-os/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 **A living map of your architecture.** Every service is a star. Kafka topics orbit between them. Real flows play as comets you can watch, pause, and inspect — payloads included. And a nightly AI agent keeps the whole map honest against your actual code.
 
 <p align="center">
@@ -36,6 +41,8 @@ Every architecture diagram starts dying the moment it's born. The wiki page is f
 - 🌙 **Drift Sync** — the nightly honesty robot. Diffs every tracked repo against a baseline SHA, filters noise with cheap regexes, asks an AI agent "does the map still tell the truth?", and opens one tidy PR per team with file:line evidence.
 
 ## Quickstart
+
+Requires Node ≥ 20.
 
 ```bash
 git clone https://github.com/ludeo-labs/cosmos-os.git
@@ -110,14 +117,18 @@ Merging the PR bumps the baseline inside the same PR — merge means caught-up, 
 
 ## Tech notes
 
-- Vite + React 18 + TypeScript (strict). One build, no server, ~10 KB gzipped of data.
+- Vite + React 18 + TypeScript (strict). One build, no server, ~13 KB gzipped of data.
 - Comets glide on the **real rendered SVG paths** (GSAP MotionPath + `getPointAtLength()`), not approximations.
 - The hyperspace intro is a plain `<canvas>` and one perspective formula — no 3D library.
 - OKLCH color tokens, themeable (`cosmos`, `light`, `minimal`, `dark`).
 
 ## Origin
 
-Cosmos began as an internal tool at [Ludeo](https://ludeo.com), built to answer "wait, what happens after the client sends this?" without archaeology. The open-source version is the same map with a fictional universe on it. The full story: *[blog post link coming soon]*.
+Cosmos began as an internal tool at [Ludeo](https://ludeo.com), built to answer "wait, what happens after the client sends this?" without archaeology. The open-source version is the same map with a fictional universe on it.
+
+## Contributing
+
+PRs welcome — [CONTRIBUTING.md](CONTRIBUTING.md) has the dev setup and the three invariants that bite. Security reports: see [SECURITY.md](SECURITY.md).
 
 ## License
 

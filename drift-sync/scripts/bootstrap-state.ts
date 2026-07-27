@@ -154,6 +154,15 @@ console.log(`    dirty:       ${dirtyCount}`);
 console.log(`    off-main:    ${offMainCount}`);
 console.log(`  Skipped:       ${skippedCount}`);
 
+if (okCount === 0) {
+  console.error(
+    `\n✗ No repos resolved — state file NOT written. Clone your source repos as` +
+    ` siblings of this repo (or set reposRoot in drift-sync/config.json) and re-run.` +
+    ` See drift-sync/README.md.`,
+  );
+  process.exit(1);
+}
+
 if (dryRun) {
   console.log(`\n(dry-run) State file NOT written. Would write to: ${statePath}`);
 } else {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 
 import { Starfield } from './Starfield';
+import { BRAND } from '../scenarios/brand';
 
 interface IntroOverlayProps {
   /** Fires the moment the CTA is pressed — App kicks off the warp. */
@@ -152,17 +153,15 @@ export function IntroOverlay({ onStart, onExitComplete }: IntroOverlayProps) {
       <div className="lc-intro-vignette" aria-hidden="true" />
 
       <motion.div className="lc-intro-inner" variants={stagger} initial="hidden" animate="visible">
-        <motion.span className="lc-intro-eyebrow" variants={child}>COSMOS · ASTROMART DEMO · 0.1</motion.span>
+        <motion.span className="lc-intro-eyebrow" variants={child}>COSMOS · {BRAND.badge.toUpperCase()} · 0.1</motion.span>
         <motion.h1 className="lc-intro-title" variants={child}>
-          <span className="lc-intro-title-line">AstroMart</span>
+          <span className="lc-intro-title-line">{BRAND.universeName}</span>
           <span className="lc-intro-title-line lc-intro-title-line--accent">
             Cosmos
           </span>
         </motion.h1>
         <motion.p className="lc-intro-sub" variants={child}>
-          A live schematic of AstroMart — a fictional space-gear shop, outfitting
-          the galaxy since 2199. Pick a domain, pick a scenario, watch the request
-          travel along constellations of services and topics.
+          {BRAND.tagline}
         </motion.p>
         <motion.div variants={child} className="lc-intro-cta-row">
           <button type="button" className="lc-intro-cta" onClick={handleStart} disabled={exiting}>

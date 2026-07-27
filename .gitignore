@@ -23,3 +23,11 @@ tsconfig.tsbuildinfo
 
 # cosmos-sync dry-run reports (kept locally for review, not committed)
 drift-sync/dry-runs/
+
+# logs & coverage
+*.log
+npm-debug.log*
+coverage/
+
+# local Claude settings
+.claude/settings.local.json

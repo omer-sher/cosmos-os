@@ -8,6 +8,8 @@ It works against **your** GitHub org and repos: everything company-specific live
 
 ---
 
+> Tip: set `DEBUG_CLONE=1` to print verbose per-repo clone/fetch output when debugging the nightly.
+
 ## What lives here
 
 ```

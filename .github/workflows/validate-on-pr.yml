@@ -1,6 +1,6 @@
 name: Validate Cosmos
 
-# Runs `npm run validate` on every PR (and on push to main) to make
+# Runs typecheck + build + `npm run validate` on every PR (and on push to main) to make
 # sure Cosmos internal consistency never regresses. Designed to be
 # marked as a REQUIRED status check in repo branch protection — once
 # you do that in the UI (Settings → Branches → main → Add rule), no
@@ -29,11 +29,20 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install deps
         run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build (typecheck + vite)
+        run: npm run build
+
+      - name: Typecheck drift-sync
+        run: npx tsc -p drift-sync --noEmit
 
       - name: Validate Cosmos
         run: npm run validate

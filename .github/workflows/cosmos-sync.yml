@@ -84,7 +84,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install deps
@@ -107,10 +107,14 @@ jobs:
 
       - name: Determine flags
         id: flags
+        env:
+          IN_MODE: ${{ github.event.inputs.mode }}
+          IN_ONLY: ${{ github.event.inputs.only_repo }}
+          IN_CONCURRENCY: ${{ github.event.inputs.concurrency }}
         run: |
-          MODE="${{ github.event.inputs.mode || 'live' }}"
-          ONLY="${{ github.event.inputs.only_repo }}"
-          CONCURRENCY="${{ github.event.inputs.concurrency || '5' }}"
+          MODE="${IN_MODE:-live}"
+          ONLY="$IN_ONLY"
+          CONCURRENCY="${IN_CONCURRENCY:-5}"
 
           EXTRA=""
           case "$MODE" in

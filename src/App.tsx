@@ -9,7 +9,6 @@ import { ActivityLog } from './components/ActivityLog';
 import { IntroOverlay } from './components/IntroOverlay';
 import { WarpTransition } from './components/WarpTransition';
 import { HelpButton } from './components/HelpButton';
-// import { CosmosChat } from './components/CosmosChat'; // disabled — see README § AI Chat
 import { Spotlight } from './components/Spotlight';
 import type { SpotlightTarget } from './components/Spotlight';
 import { BrandStarfield } from './map/BrandStarfield';
@@ -19,6 +18,7 @@ import type { Step } from './scenarios/types';
 import { useScenarioRunner } from './scenarios/runner';
 import type { Shot } from './scenarios/runner';
 import { readInitialDeepLink, useDeepLink } from './hooks/useDeepLink';
+import { BRAND } from './scenarios/brand';
 
 interface ActivityEntry { idx: number; step: Step }
 
@@ -254,7 +254,7 @@ function CosmosShell(p: CosmosShellProps) {
                   textTransform: 'uppercase',
                 }}
               >
-                AstroMart demo
+                {BRAND.badge}
               </span>
             </span>
             <DomainBar
@@ -313,7 +313,6 @@ function CosmosShell(p: CosmosShellProps) {
           onRestart={navRestart}
         />
 
-        {/* <CosmosChat /> */}
       </div>
 
       <Spotlight
