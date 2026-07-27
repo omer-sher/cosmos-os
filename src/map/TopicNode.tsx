@@ -12,7 +12,6 @@ interface TopicNodeProps {
 /**
  * Topic node — small dashed orbital ring with a tiny core.
  * Slowly rotates always (kept lightweight). Visual values lifted
- * from `design-system/source/map-preview.jsx`.
  */
 export function TopicNode({ topic: t, selected = false, dimmed = false, showLabel = false, onClick }: TopicNodeProps) {
   // Topics below the main spine pile labels downward — flip above so they stay readable.
