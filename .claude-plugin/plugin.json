@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Skills for growing and maintaining a Cosmos architecture map: add-service and add-scenario.",
   "author": { "name": "Omer Sher" },
-  "repository": "https://github.com/omer-sher/cosmos-os",
+  "repository": "https://github.com/ludeo-labs/cosmos-os",
   "license": "MIT",
   "keywords": ["architecture", "visualization", "kafka", "microservices", "documentation"]
 }

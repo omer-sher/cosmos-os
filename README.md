@@ -7,7 +7,7 @@
 **A living map of your architecture.** Every service is a star. Kafka topics orbit between them. Real flows play as comets you can watch, pause, and inspect — payloads included. And a nightly AI agent keeps the whole map honest against your actual code.
 
 <p align="center">
-  <a href="https://omer-sher.github.io/cosmos-os/"><b>▶ Live demo</b></a> ·
+  <a href="https://ludeo-labs.github.io/cosmos-os/"><b>▶ Live demo</b></a> ·
   <a href="#quickstart">Quickstart</a> ·
   <a href="#make-it-your-cosmos">Make it yours</a> ·
   <a href="#drift-sync">Drift Sync</a>
@@ -38,7 +38,7 @@ Every architecture diagram starts dying the moment it's born. The wiki page is f
 ## Quickstart
 
 ```bash
-git clone https://github.com/omer-sher/cosmos-os.git
+git clone https://github.com/ludeo-labs/cosmos-os.git
 cd cosmos-os
 npm install
 npm run dev
@@ -82,7 +82,7 @@ Two ways to populate it:
 You can also install the skills into any environment as a plugin, no clone needed:
 
 ```
-/plugin marketplace add omer-sher/cosmos-os
+/plugin marketplace add ludeo-labs/cosmos-os
 /plugin install cosmos@cosmos-os
 ```
 
